@@ -1,0 +1,231 @@
+---
+title: "DA5020 Homework 4: Strings and Factors"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  # mute messages output
+  message = FALSE
+)
+```
+
+## Preparation
+
+Download US [Farmers Markert Directory](https://www.ams.usda.gov/local-food-directories/farmersmarkets) data from the website of USDA (click on "Export to Excel"). Rename the file as _farmers_market.csv_.
+
+Download the [Know Your Farmer, Know Your Food Projects](https://catalog.data.gov/dataset/know-your-farmer-know-your-food-projects) dataset and name it as _kyfprojects.xls_. Put it into the same folder.
+
+
+```{r, eval = FALSE}
+
+
+Read the data:
+
+getwd()
+setwd("/Users/amulyashastry/Desktop")
+
+
+## Warm Up
+
+This dataset stores city and state in different columns, what if you want to
+print out city and state in the format "City, State"?
+
+```{r, eval = FALSE}
+
+##Loading Libraries
+library("dplyr")
+install.packages("stringr")
+library("stringr")
+install.packages("readxl")
+library(readxl)
+library(forcats)
+library(tidyverse)
+```{r, eval = FALSE}
+
+
+# Question 1
+
+farmers_market<-read.csv("farmers_market.csv",header=T,na.strings = c("",NA))
+View(farmers_market)
+
+dull<-mutate(farmers_market,Facebook_new=str_extract_all(Facebook,"[A-Z|0-9][a-z|0-9|A-Z][a-z|A-Z]+-*|^[0-9][0-9]|[a-z]+[:space:]|-|[A-Z]"))
+dull<-mutate(dull,Facebook=str_conv())
+fb<-dull$Facebook
+View(dull)
+
+#[a-z]+[:]+[//][//][a-z]+[.][a-z]+[.][a-z]+[//] - replace facebook.com
+str_replace_all(farmers_market$Facebook,"(http|https):[//][//]|(www|ww|m).(f|F)acebook.com[/]",replace="")
+
+#Cleaning Facebook column 
+dumb<-mutate(farmers_market, Facebook = str_replace_all(Facebook,"(https|http|www|ww|Facebook|facebook)(|:|.).(com| |)",replace=""))
+dur<-mutate(dumb,Facebook = str_replace_all(Facebook, "[//|-]+[0-9][0-9][0-9][0-9][0-9]+",replace=""))
+
+pur<-mutate(dur,Facebook = str_replace_all(Facebook,"[?][a-z]+[=][a-z]+|[&][a-z]+[=][a-z]+[_][a-z]+",replace=""))
+bur<-mutate(pur,Facebook= str_replace_all(Facebook,"[//][//][//]pages[/]",replace=""))
+bell<-mutate(bur,Facebook= str_replace_all(Facebook,"[//][//][//]",replace=""))
+nun<-mutate(bell,Facebook=str_replace_all(Facebook,"#![/]pages[/]",replace=""))
+turn<-mutate(nun,Facebook=str_replace_all(Facebook,"[//]",replace=""))
+
+View(timp)
+tilt<-mutate(turn,Facebook=str_replace_all(Facebook,"m[.]|pages",replace=""))
+tick<-mutate(tilt,Facebook=str_replace_all(Facebook,"[?][a-z]+[_|=][a-z]+[=|&][a-z]+[&|=][a-z|0-9]+[.|_][a-z|0-9]+[=|.][a-z|.][a-z|0-9]+",replace=""))
+Final<-mutate(tick,Facebook=str_replace_all(Facebook,"&[a-z]+[=][0-9]+[.][0-9]+[.]+[0-9]+",replace=""))
+
+#Cleaning Twitter column 
+
+twitter<-mutate(Final,Twitter=str_replace_all(Twitter,"@|(https|http):[//]+(www.[a-z]+.com|twitter.com|Twitter.com)[/]",replace=""))
+View(twitter3)
+twitter2<-mutate(twitter,Twitter=str_replace_all(Twitter,"//(www.twitter.com|twitter.com)",replace=""))
+twitter3<-mutate(twitter2,Twitter=str_replace_all(Twitter,"www.twitter.com|twitter.com",replace=""))
+Final<-mutate(twitter3,Twitter=str_replace_all(Twitter,"[//]",replace=""))
+
+View(twitter3)
+```
+
+
+
+```{r, eval = FALSE}
+#Question -2
+
+#cleaning street column
+street<-mutate(Final,street=str_replace_all(street,"[ ]ST[ ]|Street|ST[.]|St[.]|streets|StreetsStreets|[ ]ST[ ]|ST",replace="St"))
+
+street1<-mutate(street,street=str_replace_all(street,"[ ]and[ ]" ,replace="&"))
+
+bork<-mutate(street1,city=str_replace_all(city,"[,][ ]+[A-Z][A-Z]",replace=""))
+
+#[,][ ]+[A-Z][A-Z]+|[,][ ][A-Z][a-z][.]|[.][ ][A-Z][A-Z]
+
+#Cleaning city column
+slim<-mutate(street1,city=str_replace_all(city,"[,][ ][A-Z][A-Z]+|[ ]IN|California|Texas|Idaho|MA|Florida|NM|[ ]ND",replace=""))
+Final_city<-mutate(slim,city=str_replace_all(city,"[,][ ]Ma[.]",replace=""))
+
+View(Final_city)
+
+```
+
+#Question 3
+```{r, eval = FALSE}
+#A tibble
+online<-tibble(state=Final_city$State,Facebook=Final_city$Facebook,Twitter=Final_city$Twitter)
+
+#Filtering NA
+Final_without_na<-filter(online, !is.na(Facebook),!is.na(Twitter))
+
+#Counting the Facebook accounts 
+Final_without_na %>%
+  group_by(state) %>%
+ count(Facebook) %>%
+ add_count(n) ->percent
+
+#Percentage of Facebook account 
+percent %>%
+  collapse(state) %>%
+count(state)-> percent
+
+sum<-sum(percent$nnn)
+#percent %>%
+
+percent<-mutate(percent,new = ((nnn/sum)*100))
+
+#Percent of Twitter account
+View(percent)
+
+Final_without_na %>%
+  group_by(state) %>%
+  count(Twitter) %>%
+  add_count(n)-> twitter_percent
+
+sum2<-sum(twitter_percent$nn)
+twitter_percent<-mutate(twitter_percent,new = ((nn/sum)*100))
+
+View(twitter_percent)
+test1
+
+````
+
+```{r, eval = FALSE}
+
+#Question 4
+test1<-as_tibble(test1)
+
+#gss_cat %>%
+#mutate(partyid=recode(partyid, "Independent" = "ing"))
+#mutate(x,fct_recode(x,"a"="A"))
+#test1 %>%
+ # mutate(MarketName=fct_recode(MarketName, "Caledonia Farmers Market Association - Danville" = "BUM"))
+
+
+#Shortening the market names 
+Final_city$MarketName<-abbreviate(Final_city$MarketName,minlength = 40, use.classes = TRUE,
+dot = FALSE, strict = FALSE,
+method =  "both.sides", named = TRUE)
+
+
+
+Final_city %>% 
+  mutate(Location = fct_recode(Location,
+                             "PBPL"       = "Private business parking lot",
+                             "FSBF"       = "Federal/State government building grounds",
+                             "LGBG"       = "Local government building grounds",
+                             "COPS"       = "Closed-off public street",
+                             "CoWMF"      = "Co-located with wholesale market facility",
+                             "EdIn"       = "Educational institution",
+                             "FBI"        = "Faith-based institution (e.g., church, mosque, synagogue, temple)",
+                             "HcI"        = "Healthcare Institution",
+                             "OFF"        = "On a farm from: a barn, a greenhouse, a tent, a stand, etc",
+                             "OT"         = "Other" 
+
+)) %>%
+  count(Location)-> Plot_tibble
+
+
+#Plot_tibble<-arrange(Plot_tibble,desc(n))
+#Plotting the data
+
+#ggplot(Plot_tibble, aes(Location,n))  +
+ # geom_col
+
+ggplot(Plot_tibble, mapping = aes(x = reorder(Plot_tibble$Location, n), y = n)) + 
+  geom_bar(stat = "identity") + ylim(0,6500) + labs(title = "Market Locations", subtitle = "32% listed, 68% not listed", x = "Location", y = "Number of Markets")
+
+  
+```
+ 
+```{r, eval = FALSE}
+#Question 5
+getwd()
+kyf<-read_xls("kyfprojects.xls",sheet= 1)
+
+
+kr<-  mutate(kyf,`Program Name`=abbreviate(`Program Name`,minlength=4,use.classes=TRUE))
+kr$`Program Name`<-str_match_all(kr$`Program Name`,kr$`Program Abbreviation`)
+View(kr)
+
+#Character 0 shows the places where the abbrevations did not match 
+
+isTRUE((kr$`Program Name`==kr$`Program Abbreviation`))
+
+#Sanity check 2 
+#checking if the state column is correct
+my_states<- state.abb
+
+#for loop to check the 
+for (i in kr$State){
+if( i == my_states) {
+  x =TRUE
+}
+}
+
+#sanity check 2 
+
+
+
+```
+
+
+
+## Submission
+You need to submit an .Rmd extension file as well as the generated pdf file. Be sure to state all the assumptions and give explanations as comments in the .Rmd file wherever needed to help us assess your submission. Please name the submission file LAST_FirstInitial_1.Rmd for example for John Smith's 1st assignment, the file should be named Smith_J_1.Rmd. 
